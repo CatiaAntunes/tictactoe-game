@@ -28,3 +28,25 @@ def draw_algorithm_page(mouse_pos, algorithm_buttons, algorithm_button_images):
         else:
             screen.blit(normal_image, button.topleft)
     pygame.display.flip()
+
+def draw_confirm_page(mouse_pos, confirm_button, confirm_button_images, adversary, algorithm, robotv2_images):
+    confirmOptionLb = get_confirmOptionLb(adversary, algorithm)
+    confirmOptionLb_rect = get_confirmOptionLb_rect(confirmOptionLb)
+    screen.fill(salmon)
+    screen.blit(titleLb, titleLb_rect)
+    screen.blit(titleDescLb, titleDescLb_rect)
+    screen.blit(confirmOptionLb, confirmOptionLb_rect)
+    screen.blit(bipLb, bipLb_rect)
+    robot_normal_img, robot_hover_img = robotv2_images[0]
+    screen.blit(robot_normal_img, (500, 350))
+    for index, button in enumerate(confirm_button):
+        normal_image, hover_image = confirm_button_images[index]
+        if button.collidepoint(mouse_pos):
+            screen.blit(hover_image, button.topleft)
+            if index == 0:
+                screen.blit(robot_hover_img, (500, 350))
+            else:
+                screen.blit(robot_normal_img, (500, 350))
+        else:
+            screen.blit(normal_image, button.topleft)
+    pygame.display.flip()

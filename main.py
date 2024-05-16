@@ -2,6 +2,7 @@ import pygame
 import sys
 from functions.drawPages import draw_algorithm_page, draw_confirm_page, draw_main_page, draw_game_page
 from functions.game import *
+from theme.elements import description
 
 def get_adversary():
     return adversary
@@ -19,6 +20,7 @@ clock = pygame.time.Clock()
 
 # Import after pygame display, otherwise it does not have an active display surface when it tries to convert the images
 from theme.imagesButtons import *
+
 
 # Game state
 running = True
@@ -61,7 +63,7 @@ random.shuffle(players)
 current_player = players[0]
 current_symbol = 'X'
 last_move_time = pygame.time.get_ticks()
-move_delay = 1000
+move_delay = 1500
 player_symbols = {'X': current_player, 'O': 'BIP' if current_player == 'Adversary' else 'Adversary'}
 
 
@@ -75,6 +77,28 @@ def make_robot_move():
         current_player = 'Adversary' if current_player == 'BIP' else 'BIP'
         update_display = True
         last_move_time = pygame.time.get_ticks()
+
+def draw_current_turn():
+
+    # Coordinates for the player displays
+    left_side_img_coord = (100, 350)
+    right_side_img_coord = (1100, 350)
+
+    if current_player == 'BIP':
+        bip_text = description.render("BIP's turn", True, (0, 0, 0))
+        bip_img = imgBipGame
+        adversary_img = imgHumanFadedGame if adversary == 'Human' else imgRobotFadedGame
+    else:
+        bip_img = imgBipFadedGame
+        adversary_img = imgHumanGame if adversary == 'Human' else imgRobotGame
+
+    # Render BIP info on the left side
+    bip_img_rect = bip_img.get_rect(center=left_side_img_coord)
+    screen.blit(bip_img, bip_img_rect)
+
+    # Render adversary info on the right side
+    adversary_img_rect = adversary_img.get_rect(center=right_side_img_coord)
+    screen.blit(adversary_img, adversary_img_rect)
 
 while running:
     mouse_pos = pygame.mouse.get_pos()
@@ -142,6 +166,7 @@ while running:
             screen.fill((255, 255, 255))
             draw_game_page(mouse_pos, imgGameBoard)
             draw_game_board()
+            draw_current_turn()
             pygame.display.flip()
 
     if current_page != 'game':

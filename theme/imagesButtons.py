@@ -3,12 +3,16 @@ pygame.init()
 
 imgHuman = pygame.image.load('img/icons8-human-head-256.png').convert_alpha()
 imgHumanHover = pygame.image.load('img/icons8-human-head-256-hover.png').convert_alpha()
+imgHumanFaded = pygame.image.load('img/icons8-human-head-256-faded.png').convert_alpha()
 
 imgRobot = pygame.image.load('img/icons8-r2-d2-256.png').convert_alpha()
 imgRobotHover = pygame.image.load('img/icons8-r2-d2-256-hover.png').convert_alpha()
+imgRobotFaded = pygame.image.load('img/icons8-r2-d2-256-faded.png').convert_alpha()
 
 imgRobotv2 = pygame.image.load('img/icons8-bmo-256.png').convert_alpha()
 imgRobotv2Hover = pygame.image.load('img/icons8-bmo-256-hover.png').convert_alpha()
+imgBip = pygame.image.load('img/icons8-bit.png').convert_alpha()
+imgBipFaded = pygame.image.load('img/icons8-bit-faded.png').convert_alpha()
 
 imgAlphaBeta = pygame.image.load('img/alphabeta.png').convert_alpha()
 imgAlphaBetaHover = pygame.image.load('img/alphabeta-hover.png').convert_alpha()
@@ -57,3 +61,12 @@ confirm_button_images = [
 robotv2_images = [
     (imgRobotv2, imgRobotv2Hover)
 ]
+
+# Resize images for game screen
+image_size = (125,125)
+imgHumanGame = pygame.transform.scale(imgHuman, image_size)
+imgRobotGame = pygame.transform.scale(imgRobot, image_size)
+imgBipGame = pygame.transform.scale(imgBip, image_size)
+imgHumanFadedGame = pygame.transform.scale(imgHumanFaded, image_size)
+imgRobotFadedGame = pygame.transform.scale(imgRobotFaded, image_size)
+imgBipFadedGame = pygame.transform.scale(imgBipFaded, image_size)

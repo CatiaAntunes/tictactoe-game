@@ -1,6 +1,6 @@
 import pygame
 import sys
-from functions.drawPages import draw_algorithm_page, draw_confirm_page, draw_main_page
+from functions.drawPages import draw_algorithm_page, draw_confirm_page, draw_main_page, draw_game_page
 
 def get_adversary():
     return adversary
@@ -21,7 +21,7 @@ from theme.imagesButtons import *
 
 # Game state
 running = True
-current_page = 'main'
+current_page = 'game'
 hovered_button = None
 button_clicked, adversary, algorithm = '', '', ''
 
@@ -73,7 +73,7 @@ while running:
                 elif current_page == 'confirm' and confirm_check_button_click(event.pos):
                     print(f"Button {button_clicked} clicked")
                     if button_clicked == 'Yes':
-                        pass
+                        current_page = 'game'
                     else:
                         current_page = 'main'
                         adversary, algorithm = '', ''
@@ -84,9 +84,9 @@ while running:
         draw_algorithm_page(mouse_pos, algorithm_buttons, algorithm_button_images)
     elif current_page == 'confirm':
         draw_confirm_page(mouse_pos, confirm_buttons, confirm_button_images, adversary, algorithm, robotv2_images)
-        # Handle drawing for page 2
-        # Additional functionality here
-        #pygame.display.flip()
+    elif current_page == 'game':
+        draw_game_page(mouse_pos, imgGameBoard)
+
 
     clock.tick(60)  # Limit the frame rate to 60 FPS
 

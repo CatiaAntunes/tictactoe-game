@@ -31,6 +31,8 @@ userOptionDescLb_rect = userOptionDescLb.get_rect(center=(645, 385))
 
 algoOptionLb = normal.render("pick your poison", True, white)
 algoOptionLb_rect = algoOptionLb.get_rect(center=(645, 360))
+algoOptionDescLb = description.render("we mean algorithm", True, darkred)
+algoOptionDescLb_rect = userOptionDescLb.get_rect(center=(645, 385))
 
 bipLb = description.render("this is BIP, in case you're wondering", True, darkred)
 bipLb_rect = bipLb.get_rect(center=(640, 600))

@@ -22,6 +22,10 @@ imgYesHover = pygame.image.load('img/yesHover.png').convert_alpha()
 imgNo = pygame.image.load('img/no.png').convert_alpha()
 imgNoHover = pygame.image.load('img/noHover.png').convert_alpha()
 
+imgGameBoard = pygame.image.load('img/tictactoe_board.png').convert_alpha()
+imgGameCircle = pygame.image.load('img/tictactoe_circle.png').convert_alpha()
+imgGameCross = pygame.image.load('img/tictactoe_cross.png').convert_alpha()
+
 # Button setup
 btHuman = pygame.Rect(250, 250, imgHuman.get_width(), imgHumanHover.get_height())
 btRobot = pygame.Rect(789, 250, imgRobot.get_width(), imgRobotHover.get_height())

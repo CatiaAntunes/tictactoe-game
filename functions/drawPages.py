@@ -21,6 +21,7 @@ def draw_algorithm_page(mouse_pos, algorithm_buttons, algorithm_button_images):
     screen.blit(titleLb, titleLb_rect)
     screen.blit(titleDescLb, titleDescLb_rect)
     screen.blit(algoOptionLb, algoOptionLb_rect)
+    screen.blit(algoOptionDescLb, algoOptionDescLb_rect)
     for index, button in enumerate(algorithm_buttons):
         normal_image, hover_image = algorithm_button_images[index]
         if button.collidepoint(mouse_pos):
@@ -49,4 +50,15 @@ def draw_confirm_page(mouse_pos, confirm_button, confirm_button_images, adversar
                 screen.blit(robot_normal_img, (500, 350))
         else:
             screen.blit(normal_image, button.topleft)
+    pygame.display.flip()
+
+def draw_game_page(mouse_pos, game_board):
+    screen.fill(salmon)
+    titleLb_rect = titleLb.get_rect(center=(150, 50))
+    titleDescLb_rect = titleDescLb.get_rect(center=(220,70))
+    screen.blit(titleLb, titleLb_rect)
+    screen.blit(titleDescLb, titleDescLb_rect)
+    screen.blit(game_board, (325,50))
+    
+
     pygame.display.flip()

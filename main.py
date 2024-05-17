@@ -1,15 +1,16 @@
 import pygame
 import sys
 from functions.drawPages import draw_algorithm_page, draw_confirm_page, draw_main_page, draw_game_page
-from functions.game import *
+from functions.game import cells, draw_game_board, check_winner, Cell
 from theme.elements import description
+from algorithms.minmax import minmax
+import random
 
 def get_adversary():
     return adversary
 
 def get_algorithm():
     return algorithm
-
 
 # Initialize Pygame
 pygame.init()
@@ -20,7 +21,6 @@ clock = pygame.time.Clock()
 
 # Import after pygame display, otherwise it does not have an active display surface when it tries to convert the images
 from theme.imagesButtons import *
-
 
 # Game state
 running = True
@@ -58,7 +58,7 @@ def confirm_check_button_click(pos):
             return True
     return False
 
-players = ['BIP', 'Adversary'] 
+players = ['BIP', 'Adversary']
 random.shuffle(players)
 current_player = players[0]
 current_symbol = 'X'
@@ -66,21 +66,31 @@ last_move_time = pygame.time.get_ticks()
 move_delay = 1500
 player_symbols = {'X': current_player, 'O': 'BIP' if current_player == 'Adversary' else 'Adversary'}
 
-
 def make_robot_move():
     global current_symbol, update_display, last_move_time, current_player
-    available_cells = [cell for row in cells for cell in row if not cell.clicked]
-    if available_cells:
-        cell = random.choice(available_cells)
-        cell.click(current_symbol)
-        current_symbol = 'O' if current_symbol == 'X' else 'X'
-        current_player = 'Adversary' if current_player == 'BIP' else 'BIP'
-        update_display = True
-        last_move_time = pygame.time.get_ticks()
+    if algorithm == 'MinMax':  # Check if is MinMax algorithm
+        best_score = float('-inf')
+        best_move = None
+        for row in cells:
+            for cell in row:
+                if not cell.clicked:
+                    cell.click('O')  # Temporary play for the AI to evaluate the move
+                    score = minmax(cells, 5, False)
+                    cell.clicked = False
+                    cell.symbol = None
+                    if score > best_score:
+                        best_score = score
+                        best_move = cell
+
+        if best_move:
+            best_move.click('O')  # Play AI move
+            current_symbol = 'X'  # Human uses 'X' as symbol to play
+            current_player = 'Adversary' if current_player == 'BIP' else 'BIP'
+            update_display = True
+            last_move_time = pygame.time.get_ticks()
+
 
 def draw_current_turn():
-
-    # Coordinates for the player displays
     left_side_img_coord = (100, 350)
     right_side_img_coord = (1100, 350)
 
@@ -92,11 +102,9 @@ def draw_current_turn():
         bip_img = imgBipFadedGame
         adversary_img = imgHumanGame if adversary == 'Human' else imgRobotGame
 
-    # Render BIP info on the left side
     bip_img_rect = bip_img.get_rect(center=left_side_img_coord)
     screen.blit(bip_img, bip_img_rect)
 
-    # Render adversary info on the right side
     adversary_img_rect = adversary_img.get_rect(center=right_side_img_coord)
     screen.blit(adversary_img, adversary_img_rect)
 
@@ -113,12 +121,10 @@ while running:
                     print(f"Button {button_clicked} clicked")
                     adversary = button_clicked
                     update_display = True
-                    
                 elif current_page == 'algorithm' and algorithm_check_button_click(event.pos):
                     print(f"Button {button_clicked} clicked")
                     algorithm = button_clicked
                     update_display = True
-                
                 elif current_page == 'confirm' and confirm_check_button_click(event.pos):
                     print(f"Button {button_clicked} clicked")
                     if button_clicked == 'Yes':

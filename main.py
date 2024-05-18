@@ -34,7 +34,6 @@ main_button_choices = ["Human", "Robot"]
 algorithm_button_choices = ["AlphaBeta", "MinMax"]
 confirm_button_choices = ["Yes", "No"]
 
-# Your new code starts here
 def main_check_button_click(pos):
     global current_page, button_clicked
     for index, button in enumerate(main_buttons):
@@ -85,9 +84,12 @@ def make_robot_move():
         for cell in row:
             if not cell.clicked:
                 cell.click(symbol)  # Temporary play for the AI to evaluate the move
-                score = alphabeta(cells, 5, float('-inf'), float('inf'), False)
-                cell.clicked = False  # Reset state of the cell
-                cell.symbol = None  # Reset the symbol of the cell
+                if algorithm == 'MinMax':
+                    score = minmax(cells, 5, False)
+                else:  # AlphaBeta
+                    score = alphabeta(cells, 5, float('-inf'), float('inf'), False)
+                cell.clicked = False
+                cell.symbol = None
                 if score > best_score:
                     best_score = score
                     best_move = cell

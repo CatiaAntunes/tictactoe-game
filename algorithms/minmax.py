@@ -39,3 +39,4 @@ def evaluate(winner):
         return -1
     else:
         return 0
+

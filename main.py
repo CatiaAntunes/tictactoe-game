@@ -34,6 +34,7 @@ main_button_choices = ["Human", "Robot"]
 algorithm_button_choices = ["AlphaBeta", "MinMax"]
 confirm_button_choices = ["Yes", "No"]
 
+# Your new code starts here
 def main_check_button_click(pos):
     global current_page, button_clicked
     for index, button in enumerate(main_buttons):
@@ -69,76 +70,42 @@ move_delay = 1500
 player_symbols = {'X': 'Adversary', 'O': 'BIP'}
 
 num_moves = 0
+
 def make_robot_move():
     global current_symbol, update_display, last_move_time, current_player, num_moves
-    if current_player == 'BIP':
-        symbol = 'O'
-        next_symbol = 'X'
-        next_player = 'Adversary'
-    else:
-        symbol = 'X'
-        next_symbol = 'O'
-        next_player = 'BIP'
+    symbol = current_symbol
+    next_symbol = 'O' if current_symbol == 'X' else 'X'
+    next_player = 'BIP' if current_player == 'Adversary' else 'Adversary'
 
-    if algorithm == 'MinMax':  # Check if MinMax algorithm
-        start_time = time.time()
-        best_score = float('-inf')
-        best_move = None
-        for row in cells:
-            for cell in row:
-                if not cell.clicked:
-                    cell.click(symbol)  # Temporary play for the AI to evaluate the move
-                    score = minmax(cells, 5, False)
-                    cell.clicked = False
-                    cell.symbol = None
-                    if score > best_score:
-                        best_score = score
-                        best_move = cell
+    start_time = time.time()
+    best_score = float('-inf')
+    best_move = None
 
-        if best_move:
-            best_move.click(symbol)  # Play AI move
-            current_symbol = next_symbol
-            current_player = next_player
-            update_display = True
-            last_move_time = pygame.time.get_ticks() # Update last move time
-            end_time = time.time() # Get end time
-            elapsed_time = end_time - start_time # Calculate elapsed time
-            num_moves += 1  # Increment number of moves
-            # Show time spent by AI move with 4 decimal places and avoid "0.0"
-            if elapsed_time > 0.0001:  # Check if time is greater than 0.0001 seconds
-                print(f"Move {num_moves}: Time Spent: {elapsed_time:.4f} seconds")
-            else:
-                print(f"Move {num_moves}: Time Spent: < 0.0001 seconds")
+    for row in cells:
+        for cell in row:
+            if not cell.clicked:
+                cell.click(symbol)  # Temporary play for the AI to evaluate the move
+                score = alphabeta(cells, 5, float('-inf'), float('inf'), False)
+                cell.clicked = False  # Reset state of the cell
+                cell.symbol = None  # Reset the symbol of the cell
+                if score > best_score:
+                    best_score = score
+                    best_move = cell
 
-    elif algorithm == 'AlphaBeta':  # Check if AlphaBeta algorithm
-        start_time = time.time()
-        best_score = float('-inf')
-        best_move = None
-        for row in cells:
-            for cell in row:
-                if not cell.clicked:
-                    cell.click(symbol)  # Temporary play for the AI to evaluate the move
-                    score = alphabeta(cells, 5, float('-inf'), float('inf'), False)
-                    cell.clicked = False
-                    cell.symbol = None
-                    if score > best_score:
-                        best_score = score
-                        best_move = cell
-
-        if best_move:
-            best_move.click(symbol)  # Play AI move
-            current_symbol = next_symbol
-            current_player = next_player
-            update_display = True
-            last_move_time = pygame.time.get_ticks() # Update last move time
-            end_time = time.time() # Get end time
-            elapsed_time = end_time - start_time
-            num_moves += 1  # Increment number of moves
-            # Show time spent by AI move with 4 decimal places and avoid "0.0"
-            if elapsed_time > 0.0001:  # Check if time is greater than 0.0001 seconds
-                print(f"Move {num_moves}: Time Spent: {elapsed_time:.4f} seconds")
-            else:
-                print(f"Move {num_moves}: Time Spent: < 0.0001 seconds")
+    if best_move:
+        best_move.click(symbol)  # Play AI move
+        current_symbol = next_symbol
+        current_player = next_player
+        update_display = True
+        last_move_time = pygame.time.get_ticks()  # Update last move time
+        end_time = time.time()  # Get end time
+        elapsed_time = end_time - start_time  # Calculate elapsed time
+        num_moves += 1  # Increment number of moves
+        # Show time spent by AI move with 4 decimal places and avoid "0.0"
+        if elapsed_time > 0.0001:  # Check if time is greater than 0.0001 seconds
+            print(f"Move {num_moves}: Time Spent: {elapsed_time:.4f} seconds")
+        else:
+            print(f"Move {num_moves}: Time Spent: < 0.0001 seconds")
 
 def draw_current_turn():
     left_side_img_coord = (100, 350)
@@ -184,16 +151,15 @@ while running:
                         current_page = 'main'
                         adversary, algorithm = '', ''
                     update_display = True
-                elif current_page == 'game':
-                    if adversary == 'Human' and current_player == 'Adversary':
-                        for row in cells:
-                            for cell in row:
-                                if cell.rect.collidepoint(event.pos):
-                                    if cell.click(current_symbol):
-                                        current_symbol = 'O' if current_symbol == 'X' else 'X'
-                                        current_player = 'BIP'
-                                        update_display = True
-                                        last_move_time = pygame.time.get_ticks()  # Update last move time
+                elif current_page == 'game' and adversary == 'Human' and current_player == 'Adversary':
+                    for row in cells:
+                        for cell in row:
+                            if cell.rect.collidepoint(event.pos) and not cell.clicked:
+                                if cell.click(current_symbol):
+                                    current_symbol = 'O' if current_symbol == 'X' else 'X'
+                                    current_player = 'BIP'
+                                    update_display = True
+                                    last_move_time = pygame.time.get_ticks()  # Update last move time
 
     if current_page == 'game':
         if adversary == 'Human' and current_player == 'BIP' and current_time - last_move_time > move_delay:

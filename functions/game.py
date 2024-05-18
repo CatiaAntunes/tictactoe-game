@@ -1,7 +1,9 @@
 import pygame
 import random
-screen = pygame.display.set_mode((1280, 720))
+import time
 from theme.imagesButtons import imgGameCircle, imgGameCross
+
+screen = pygame.display.set_mode((1280, 720))
 
 class Cell:
     def __init__(self, x, y, width, height):

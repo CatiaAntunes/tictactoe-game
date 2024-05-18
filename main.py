@@ -1,9 +1,11 @@
 import pygame
 import sys
+import time
 from functions.drawPages import draw_algorithm_page, draw_confirm_page, draw_main_page, draw_game_page
 from functions.game import cells, draw_game_board, check_winner, Cell
 from theme.elements import description
 from algorithms.minmax import minmax
+from algorithms.alphabeta import alphabeta
 import random
 
 def get_adversary():
@@ -61,20 +63,31 @@ def confirm_check_button_click(pos):
 players = ['BIP', 'Adversary']
 random.shuffle(players)
 current_player = players[0]
-current_symbol = 'X'
+current_symbol = 'X' if current_player == 'Adversary' else 'O'
 last_move_time = pygame.time.get_ticks()
 move_delay = 1500
-player_symbols = {'X': current_player, 'O': 'BIP' if current_player == 'Adversary' else 'Adversary'}
+player_symbols = {'X': 'Adversary', 'O': 'BIP'}
 
+num_moves = 0
 def make_robot_move():
-    global current_symbol, update_display, last_move_time, current_player
-    if algorithm == 'MinMax':  # Check if is MinMax algorithm
+    global current_symbol, update_display, last_move_time, current_player, num_moves
+    if current_player == 'BIP':
+        symbol = 'O'
+        next_symbol = 'X'
+        next_player = 'Adversary'
+    else:
+        symbol = 'X'
+        next_symbol = 'O'
+        next_player = 'BIP'
+
+    if algorithm == 'MinMax':  # Check if MinMax algorithm
+        start_time = time.time()
         best_score = float('-inf')
         best_move = None
         for row in cells:
             for cell in row:
                 if not cell.clicked:
-                    cell.click('O')  # Temporary play for the AI to evaluate the move
+                    cell.click(symbol)  # Temporary play for the AI to evaluate the move
                     score = minmax(cells, 5, False)
                     cell.clicked = False
                     cell.symbol = None
@@ -83,12 +96,49 @@ def make_robot_move():
                         best_move = cell
 
         if best_move:
-            best_move.click('O')  # Play AI move
-            current_symbol = 'X'  # Human uses 'X' as symbol to play
-            current_player = 'Adversary' if current_player == 'BIP' else 'BIP'
+            best_move.click(symbol)  # Play AI move
+            current_symbol = next_symbol
+            current_player = next_player
             update_display = True
-            last_move_time = pygame.time.get_ticks()
+            last_move_time = pygame.time.get_ticks() # Update last move time
+            end_time = time.time() # Get end time
+            elapsed_time = end_time - start_time # Calculate elapsed time
+            num_moves += 1  # Increment number of moves
+            # Show time spent by AI move with 4 decimal places and avoid "0.0"
+            if elapsed_time > 0.0001:  # Check if time is greater than 0.0001 seconds
+                print(f"Move {num_moves}: Time Spent: {elapsed_time:.4f} seconds")
+            else:
+                print(f"Move {num_moves}: Time Spent: < 0.0001 seconds")
 
+    elif algorithm == 'AlphaBeta':  # Check if AlphaBeta algorithm
+        start_time = time.time()
+        best_score = float('-inf')
+        best_move = None
+        for row in cells:
+            for cell in row:
+                if not cell.clicked:
+                    cell.click(symbol)  # Temporary play for the AI to evaluate the move
+                    score = alphabeta(cells, 5, float('-inf'), float('inf'), False)
+                    cell.clicked = False
+                    cell.symbol = None
+                    if score > best_score:
+                        best_score = score
+                        best_move = cell
+
+        if best_move:
+            best_move.click(symbol)  # Play AI move
+            current_symbol = next_symbol
+            current_player = next_player
+            update_display = True
+            last_move_time = pygame.time.get_ticks() # Update last move time
+            end_time = time.time() # Get end time
+            elapsed_time = end_time - start_time
+            num_moves += 1  # Increment number of moves
+            # Show time spent by AI move with 4 decimal places and avoid "0.0"
+            if elapsed_time > 0.0001:  # Check if time is greater than 0.0001 seconds
+                print(f"Move {num_moves}: Time Spent: {elapsed_time:.4f} seconds")
+            else:
+                print(f"Move {num_moves}: Time Spent: < 0.0001 seconds")
 
 def draw_current_turn():
     left_side_img_coord = (100, 350)
@@ -126,6 +176,7 @@ while running:
                     algorithm = button_clicked
                     update_display = True
                 elif current_page == 'confirm' and confirm_check_button_click(event.pos):
+                    print(f"Button {button_clicked}")
                     print(f"Button {button_clicked} clicked")
                     if button_clicked == 'Yes':
                         current_page = 'game'
@@ -155,7 +206,7 @@ while running:
         if winner == 'Draw':
             print("It's a draw!")
         else:
-            winner_name = player_symbols[winner]
+            winner_name = 'BIP' if winner == 'O' else 'Adversary'
             if winner_name == 'Adversary':
                 winner_name = 'Human' if adversary == 'Human' else 'Robot'
             print(f"Player {winner_name} wins!")

@@ -8,6 +8,7 @@ from algorithms.minmax import minmax
 from algorithms.alphabeta import alphabeta
 import random
 
+# Functions to get Adversary and Algorithm
 def get_adversary():
     return adversary
 
@@ -25,93 +26,143 @@ clock = pygame.time.Clock()
 from theme.imagesButtons import *
 
 # Game state
+#  control game loop
 running = True
-current_page = 'main'
-hovered_button = None
-button_clicked, adversary, algorithm = '', '', ''
+#  tracks the current page being displayed
+currentPage = 'main'
+# tracks the current hovered button
+hoveredButton = None
+# variables to store the clicked button and the selected adversay and algorithm
+buttonClicked, adversary, algorithm = '', '', ''
 
-main_button_choices = ["Human", "Robot"]
-algorithm_button_choices = ["AlphaBeta", "MinMax"]
-confirm_button_choices = ["Yes", "No"]
+# List of choices for buttons on different pages, to be mapped inside the Button Click Check functions
+mainButtonChoices = ["Human", "Robot"]
+algorithmButtonChoices = ["AlphaBeta", "MinMax"]
+confirmButtonChoices = ["Yes", "No"]
 
-# Your new code starts here
+""" Button Click Functions 
+Used in the main game loop to check whether a button has been clicked and what to do after
+Main Check Button Click = To control when a button of the main buttons is clicked, leading to next page and saving button clicked to later use (adversary)
+Algorithm Check Button Click = To control when a button of the algorithm buttons is clicked, leading to next page and saving button clicked to later use (algorithm)
+Confirm Check Button Click = To control when a button of the confirm buttons is clicked, leading to the game or returning to main page
+"""
 def main_check_button_click(pos):
-    global current_page, button_clicked
-    for index, button in enumerate(main_buttons):
+    # with global, we're saying that these variables inside the function refer to the global variables defined outside this function
+    global currentPage, buttonClicked
+    for index, button in enumerate(mainButtons):
         if button.collidepoint(pos):
-            current_page = 'algorithm'
-            button_clicked = main_button_choices[index]
+            # Regardless of the choice, it goes to next page, which we defined is the confirm page
+            currentPage = 'algorithm'
+            # We know before that, for example, the first button in mainButtons (from imagesButtons.py) refers to the first button in mainButtonChoices (main.py) and so on
+            buttonClicked = mainButtonChoices[index]
             return True
     return False
 
 def algorithm_check_button_click(pos):
-    global current_page, button_clicked
-    for index, button in enumerate(algorithm_buttons):
+    # refer to the global variables defined outside this function
+    global currentPage, buttonClicked
+    for index, button in enumerate(algorithmButtons):
         if button.collidepoint(pos):
-            current_page = 'confirm'
-            button_clicked = algorithm_button_choices[index]
+            # Regardless of the choice, it goes to next page, which we defined is the confirm page
+            currentPage = 'confirm'
+            # We know before that, for example, the first button in algorithmButtons (from imagesButtons.py) refers to the first button in algorithmButtonChoices (main.py) and so on
+            buttonClicked = algorithmButtonChoices[index]
             return True
     return False
 
 def confirm_check_button_click(pos):
-    global current_page, button_clicked
-    for index, button in enumerate(confirm_buttons):
+    # refer to the global variables defined outside this function
+    global currentPage, buttonClicked
+    for index, button in enumerate(confirmButtons):
         if button.collidepoint(pos):
-            button_clicked = confirm_button_choices[index]
+            # We know before that, for example, the first button in confirmButtons (from imagesButtons.py) refers to the first button in confirmButtonChoices (main.py) and so on
+            buttonClicked = confirmButtonChoices[index]
             return True
     return False
 
+""" Game Setup """
+# List of Players and mapping of their symbols
 players = ['BIP', 'Adversary']
-random.shuffle(players)
-current_player = players[0]
-current_symbol = 'X' if current_player == 'Adversary' else 'O'
-last_move_time = pygame.time.get_ticks()
-move_delay = 1500
-player_symbols = {'X': 'Adversary', 'O': 'BIP'}
+playerSymbols = {'X': 'Adversary', 'O': 'BIP'}
 
-num_moves = 0
+# Removed random first player because we assigned harcoded that the 'Adversary' is the first player and gets the 'X'
+#  to improve: get the first player randomly and assign 'X' to it
+#random.shuffle(players)
 
+# First player is the second place in the list ('Adversary')
+currentPlayer = players[1]
+
+# Sets the current symbol to control later on which symbol to draw ingame
+currentSymbol = 'X'
+
+# Statistics - Initialize number of moves (to know later on how many moves were made)
+numMoves = 0
+# Statistics - Tracks the time of the last move (to know later on how long does it take for the AI to play)
+lastMoveTime = pygame.time.get_ticks()
+# Move Delay = used to see the plays without being too fast and closing the game immediately
+moveDelay = 1500
+
+""" Make Robot Move 
+Handles the logic for the AI to make a move
+"""
 def make_robot_move():
-    global current_symbol, update_display, last_move_time, current_player, num_moves
-    symbol = current_symbol
-    next_symbol = 'O' if current_symbol == 'X' else 'X'
-    next_player = 'BIP' if current_player == 'Adversary' else 'Adversary'
+    # Gets variables defined outside of the function
+    global currentSymbol, updateDisplay, lastMoveTime, currentPlayer, numMoves
+    # Gets the symbol of the current player
+    symbol = currentSymbol
+    # Saves next symbol and player for when a play ends
+    nextSymbol = 'O' if currentSymbol == 'X' else 'X'
+    nextPlayer = 'BIP' if currentPlayer == 'Adversary' else 'Adversary'
 
-    start_time = time.time()
-    best_score = float('-inf')
-    best_move = None
+    # Initializes timing and best move tracking
+    startTime = time.time()
+    bestScore = float('-inf')
+    bestMove = None
 
+    # Evaluates each cell
     for row in cells:
         for cell in row:
+            # If a cell is not clicked, simulate a click
             if not cell.clicked:
-                cell.click(symbol)  # Temporary play for the AI to evaluate the move
-                score = alphabeta(cells, 5, float('-inf'), float('inf'), False)
-                cell.clicked = False  # Reset state of the cell
-                cell.symbol = None  # Reset the symbol of the cell
-                if score > best_score:
-                    best_score = score
-                    best_move = cell
+                cell.click(symbol)
+                # Uses the algorithm based on the current player and selected algorithm
+                if ((algorithm == 'MinMax' and currentPlayer == 'BIP') or (algorithm == 'AlphaBeta' and currentPlayer == 'Adversary')):
+                    score = minmax(cells, 5, False)
+                else:
+                    score = alphabeta(cells, 5, float('-inf'), float('inf'), False)
+                # Resets the cell after evaluation
+                cell.clicked = False
+                cell.symbol = None
+                # Tracks the best move based on the score
+                if score > bestScore:
+                    bestScore = score
+                    bestMove = cell
+    # Make the best move, if found
+    if bestMove:
+        bestMove.click(symbol)
+        # Updates game state variables
+        currentSymbol = nextSymbol
+        currentPlayer = nextPlayer
+        updateDisplay = True
 
-    if best_move:
-        best_move.click(symbol)  # Play AI move
-        current_symbol = next_symbol
-        current_player = next_player
-        update_display = True
-        last_move_time = pygame.time.get_ticks()  # Update last move time
-        end_time = time.time()  # Get end time
-        elapsed_time = end_time - start_time  # Calculate elapsed time
-        num_moves += 1  # Increment number of moves
+        # Updates statistic variables
+        lastMoveTime = pygame.time.get_ticks()
+        endTime = time.time()
+        elapsed_time = endTime - startTime
+        numMoves += 1
         # Show time spent by AI move with 4 decimal places and avoid "0.0"
         if elapsed_time > 0.0001:  # Check if time is greater than 0.0001 seconds
-            print(f"Move {num_moves}: Time Spent: {elapsed_time:.4f} seconds")
+            print(f"Move {numMoves}: Time Spent: {elapsed_time:.4f} seconds")
         else:
-            print(f"Move {num_moves}: Time Spent: < 0.0001 seconds")
+            print(f"Move {numMoves}: Time Spent: < 0.0001 seconds")
 
+# Function responsible for displaying which player turn is it
+#  Only showing images and not text. To improve
 def draw_current_turn():
     left_side_img_coord = (100, 350)
     right_side_img_coord = (1100, 350)
 
-    if current_player == 'BIP':
+    if currentPlayer == 'BIP':
         bip_text = description.render("BIP's turn", True, (0, 0, 0))
         bip_img = imgBipGame
         adversary_img = imgHumanFadedGame if adversary == 'Human' else imgRobotFadedGame
@@ -125,46 +176,49 @@ def draw_current_turn():
     adversary_img_rect = adversary_img.get_rect(center=right_side_img_coord)
     screen.blit(adversary_img, adversary_img_rect)
 
+""" Main Game Loop """
 while running:
+    # Tracks the current mouse position
     mouse_pos = pygame.mouse.get_pos()
-    update_display = False
-    current_time = pygame.time.get_ticks()
+
+    updateDisplay = False
+    currentTime = pygame.time.get_ticks()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:  # Left mouse button
-                if current_page == 'main' and main_check_button_click(event.pos):
-                    print(f"Button {button_clicked} clicked")
-                    adversary = button_clicked
-                    update_display = True
-                elif current_page == 'algorithm' and algorithm_check_button_click(event.pos):
-                    print(f"Button {button_clicked} clicked")
-                    algorithm = button_clicked
-                    update_display = True
-                elif current_page == 'confirm' and confirm_check_button_click(event.pos):
-                    print(f"Button {button_clicked}")
-                    print(f"Button {button_clicked} clicked")
-                    if button_clicked == 'Yes':
-                        current_page = 'game'
+                if currentPage == 'main' and main_check_button_click(event.pos):
+                    print(f"Button {buttonClicked} clicked")
+                    adversary = buttonClicked
+                    updateDisplay = True
+                elif currentPage == 'algorithm' and algorithm_check_button_click(event.pos):
+                    print(f"Button {buttonClicked} clicked")
+                    algorithm = buttonClicked
+                    updateDisplay = True
+                elif currentPage == 'confirm' and confirm_check_button_click(event.pos):
+                    print(f"Button {buttonClicked}")
+                    print(f"Button {buttonClicked} clicked")
+                    if buttonClicked == 'Yes':
+                        currentPage = 'game'
                     else:
-                        current_page = 'main'
+                        currentPage = 'main'
                         adversary, algorithm = '', ''
-                    update_display = True
-                elif current_page == 'game' and adversary == 'Human' and current_player == 'Adversary':
+                    updateDisplay = True
+                elif currentPage == 'game' and adversary == 'Human' and currentPlayer == 'Adversary':
                     for row in cells:
                         for cell in row:
                             if cell.rect.collidepoint(event.pos) and not cell.clicked:
-                                if cell.click(current_symbol):
-                                    current_symbol = 'O' if current_symbol == 'X' else 'X'
-                                    current_player = 'BIP'
-                                    update_display = True
-                                    last_move_time = pygame.time.get_ticks()  # Update last move time
+                                if cell.click(currentSymbol):
+                                    currentSymbol = 'O' if currentSymbol == 'X' else 'X'
+                                    currentPlayer = 'BIP'
+                                    updateDisplay = True
+                                    lastMoveTime = pygame.time.get_ticks()  # Update last move time
 
-    if current_page == 'game':
-        if adversary == 'Human' and current_player == 'BIP' and current_time - last_move_time > move_delay:
+    if currentPage == 'game':
+        if adversary == 'Human' and currentPlayer == 'BIP' and currentTime - lastMoveTime > moveDelay:
             make_robot_move()
-        elif adversary == 'Robot' and current_time - last_move_time > move_delay:
+        elif adversary == 'Robot' and currentTime - lastMoveTime > moveDelay:
             make_robot_move()
 
     winner = check_winner()
@@ -178,21 +232,21 @@ while running:
             print(f"Player {winner_name} wins!")
         running = False
 
-    if current_page == 'main':
-        draw_main_page(mouse_pos, main_buttons, main_button_images)
-    elif current_page == 'algorithm':
-        draw_algorithm_page(mouse_pos, algorithm_buttons, algorithm_button_images)
-    elif current_page == 'confirm':
-        draw_confirm_page(mouse_pos, confirm_buttons, confirm_button_images, adversary, algorithm, robotv2_images)
-    elif current_page == 'game':
-        if update_display:
+    if currentPage == 'main':
+        draw_main_page(mouse_pos, mainButtons, mainButtonImages)
+    elif currentPage == 'algorithm':
+        draw_algorithm_page(mouse_pos, algorithmButtons, algorithmButtonImages)
+    elif currentPage == 'confirm':
+        draw_confirm_page(mouse_pos, confirmButtons, confirmButtonImages, adversary, algorithm, robotv2Images)
+    elif currentPage == 'game':
+        if updateDisplay:
             screen.fill((255, 255, 255))
             draw_game_page(mouse_pos, imgGameBoard)
             draw_game_board()
             draw_current_turn()
             pygame.display.flip()
 
-    if current_page != 'game':
+    if currentPage != 'game':
         pygame.display.flip()
 
     clock.tick(60)  # Limit the frame rate to 60 FPS

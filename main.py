@@ -115,7 +115,7 @@ def make_robot_move():
     nextPlayer = 'BIP' if currentPlayer == 'Adversary' else 'Adversary'
 
     # Initializes timing and best move tracking
-    startTime = time.time()
+    startTime = time.perf_counter_ns()
     bestScore = float('-inf')
     bestMove = None
 
@@ -146,15 +146,18 @@ def make_robot_move():
         updateDisplay = True
 
         # Updates statistic variables
-        lastMoveTime = pygame.time.get_ticks()
-        endTime = time.time()
-        elapsed_time = endTime - startTime
+        lastMoveTime = pygame.time.get_ticks()  # Update last move time
+        endTime = time.perf_counter_ns()  # Get end time
+        elapsed_time_ns = endTime - startTime
         numMoves += 1
         # Show time spent by AI move with 4 decimal places and avoid "0.0"
-        if elapsed_time > 0.0001:  # Check if time is greater than 0.0001 seconds
-            print(f"Move {numMoves}: Time Spent: {elapsed_time:.4f} seconds")
+        elapsed_time_us = elapsed_time_ns / 1_000  # Convert nanoseconds to microseconds
+        elapsed_time_s = elapsed_time_ns / 1_000_000_000
+        if elapsed_time_ns > 100:  # Check if time is greater than 100 nanoseconds
+            print(f"Move {numMoves}: Time Spent: {elapsed_time_s:.4f} seconds ({elapsed_time_us:.0f} microseconds)")
         else:
-            print(f"Move {numMoves}: Time Spent: < 0.0001 seconds")
+            print(f"Move {numMoves}: Time Spent: < 0.0001 seconds (< 100 microseconds)")
+
 
 # Function responsible for displaying which player turn is it
 #  Only showing images and not text. To improve

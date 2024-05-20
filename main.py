@@ -7,6 +7,7 @@ from theme.elements import description
 from algorithms.minmax import minmax
 from algorithms.alphabeta import alphabeta
 import random
+import tracemalloc
 
 # Functions to get Adversary and Algorithm
 def get_adversary():
@@ -14,6 +15,13 @@ def get_adversary():
 
 def get_algorithm():
     return algorithm
+
+def display_top(snapshot):
+    top_stats = snapshot.statistics('lineno')
+    #print("[ Top 10 Memory Consuming Lines ]")
+    for stat in top_stats[:10]:
+        print(stat)
+    print('')
 
 # Initialize Pygame
 pygame.init()
@@ -116,6 +124,7 @@ def make_robot_move():
     nextPlayer = 'BIP' if currentPlayer == 'Adversary' else 'Adversary'
 
     # Initializes timing and best move tracking
+    tracemalloc.start()
     startTime = time.perf_counter_ns()
     bestScore = float('-inf')
     bestMove = None
@@ -160,6 +169,9 @@ def make_robot_move():
             print(f"Move {numMoves}: Time Spent: {elapsed_time_s:.4f} seconds ({elapsed_time_us:.0f} microseconds)")
         else:
             print(f"Move {numMoves}: Time Spent: < 0.0001 seconds (< 100 microseconds)")
+        snapshot = tracemalloc.take_snapshot()
+        tracemalloc.stop()
+        display_top(snapshot)
 
 
 # Function responsible for displaying which player turn is it

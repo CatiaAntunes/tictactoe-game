@@ -85,4 +85,3 @@ def evaluate(winner, depth):
         return depth - 10
     else:
         return 0
-

@@ -180,31 +180,41 @@ def draw_current_turn():
 while running:
     # Tracks the current mouse position
     mouse_pos = pygame.mouse.get_pos()
-
+    # Flag to indicate if the display needs updating
     updateDisplay = False
+    # Tracks the current time in milliseconds
     currentTime = pygame.time.get_ticks()
+    # Event Handling
     for event in pygame.event.get():
+        # Quit Event to Stop the Game
         if event.type == pygame.QUIT:
             running = False
+        # Mouse button down event to handle clicks on different pages and game interactions
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:  # Left mouse button
+                # Handles main page button clicks and changes; also logs which pages has been clicked
                 if currentPage == 'main' and main_check_button_click(event.pos):
                     print(f"Button {buttonClicked} clicked")
                     adversary = buttonClicked
                     updateDisplay = True
+                # Handles algorithm page button clicks and changes; also logs which pages has been clicked
                 elif currentPage == 'algorithm' and algorithm_check_button_click(event.pos):
                     print(f"Button {buttonClicked} clicked")
                     algorithm = buttonClicked
                     updateDisplay = True
+                # Handles confirm page button clicks and changes; also logs which pages has been clicked
                 elif currentPage == 'confirm' and confirm_check_button_click(event.pos):
                     print(f"Button {buttonClicked}")
                     print(f"Button {buttonClicked} clicked")
+                    # If user clicks yes, it proceeds to game
                     if buttonClicked == 'Yes':
                         currentPage = 'game'
+                    # otherwise, it goes back to the main page and resets user choices up until this point
                     else:
                         currentPage = 'main'
                         adversary, algorithm = '', ''
                     updateDisplay = True
+                # Handles game page interactions, when it's the Human playing (for user input) - for others there's no need to check for mouse input, for example
                 elif currentPage == 'game' and adversary == 'Human' and currentPlayer == 'Adversary':
                     for row in cells:
                         for cell in row:
@@ -214,13 +224,14 @@ while running:
                                     currentPlayer = 'BIP'
                                     updateDisplay = True
                                     lastMoveTime = pygame.time.get_ticks()  # Update last move time
-
+    # If we're in game and it is not the Human playing, but BIP or the Robot, make_robot_move()
     if currentPage == 'game':
         if adversary == 'Human' and currentPlayer == 'BIP' and currentTime - lastMoveTime > moveDelay:
             make_robot_move()
         elif adversary == 'Robot' and currentTime - lastMoveTime > moveDelay:
             make_robot_move()
 
+    # Checks if there's a winner and prints the results on the console
     winner = check_winner()
     if winner:
         if winner == 'Draw':
@@ -232,6 +243,7 @@ while running:
             print(f"Player {winner_name} wins!")
         running = False
 
+    # Page drawing, based on current page
     if currentPage == 'main':
         draw_main_page(mouse_pos, mainButtons, mainButtonImages)
     elif currentPage == 'algorithm':
@@ -240,7 +252,6 @@ while running:
         draw_confirm_page(mouse_pos, confirmButtons, confirmButtonImages, adversary, algorithm, robotv2Images)
     elif currentPage == 'game':
         if updateDisplay:
-            screen.fill((255, 255, 255))
             draw_game_page(mouse_pos, imgGameBoard)
             draw_game_board()
             draw_current_turn()

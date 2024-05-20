@@ -48,6 +48,7 @@ Main Check Button Click = To control when a button of the main buttons is clicke
 Algorithm Check Button Click = To control when a button of the algorithm buttons is clicked, leading to next page and saving button clicked to later use (algorithm)
 Confirm Check Button Click = To control when a button of the confirm buttons is clicked, leading to the game or returning to main page
 """
+
 def main_check_button_click(pos):
     # with global, we're saying that these variables inside the function refer to the global variables defined outside this function
     global currentPage, buttonClicked
@@ -137,6 +138,7 @@ def make_robot_move():
         for cell in row:
             # If a cell is not clicked, simulate a click
             if not cell.clicked:
+
                 cell.click(symbol)
                 # Uses the algorithm based on the current player and selected algorithm
                 if ((algorithm == 'MinMax' and currentPlayer == 'BIP') or (algorithm == 'AlphaBeta' and currentPlayer == 'Adversary')):
@@ -163,6 +165,7 @@ def make_robot_move():
         endTime = time.perf_counter_ns()  # Get end time
         elapsed_time_ns = endTime - startTime
         numMoves += 1
+        
         # Show time spent by AI move with 4 decimal places and avoid "0.0"
         elapsed_time_us = elapsed_time_ns / 1_000  # Convert nanoseconds to microseconds
         elapsed_time_s = elapsed_time_ns / 1_000_000_000
@@ -288,6 +291,7 @@ while running:
         pygame.display.flip()
 
     clock.tick(60)  # Limit the frame rate to 60 FPS
+
 
 # Keep the window open after the game ends
 while gameOver:

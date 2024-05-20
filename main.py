@@ -42,6 +42,8 @@ currentPage = 'main'
 hoveredButton = None
 # variables to store the clicked button and the selected adversay and algorithm
 buttonClicked, adversary, algorithm = '', '', ''
+# Flag to indicate if the game's over
+gameOver = False
 
 # List of choices for buttons on different pages, to be mapped inside the Button Click Check functions
 mainButtonChoices = ["Human", "Robot"]
@@ -87,6 +89,17 @@ def confirm_check_button_click(pos):
             # We know before that, for example, the first button in confirmButtons (from imagesButtons.py) refers to the first button in confirmButtonChoices (main.py) and so on
             buttonClicked = confirmButtonChoices[index]
             return True
+    return False
+
+firstMoveDone = False
+def click_randomCell():
+    available_cells = [cell for row in cells for cell in row if not cell.clicked]
+    if available_cells:
+        randomCell = random.choice(available_cells)
+        randomCell.click(currentSymbol)
+        updateDisplay = True
+        print("First random cell clicked")
+        return True
     return False
 
 """ Game Setup """
@@ -165,10 +178,12 @@ def make_robot_move():
         # Show time spent by AI move with 4 decimal places and avoid "0.0"
         elapsed_time_us = elapsed_time_ns / 1_000  # Convert nanoseconds to microseconds
         elapsed_time_s = elapsed_time_ns / 1_000_000_000
+        player = 'BIP' if symbol == 'O' else 'Robot'
         if elapsed_time_ns > 100:  # Check if time is greater than 100 nanoseconds
-            print(f"Move {numMoves}: Time Spent: {elapsed_time_s:.4f} seconds ({elapsed_time_us:.0f} microseconds)")
+            print(f"Move {numMoves} by {player}: Time Spent: {elapsed_time_s:.4f} seconds ({elapsed_time_us:.0f} microseconds)")
         else:
             print(f"Move {numMoves}: Time Spent: < 0.0001 seconds (< 100 microseconds)")
+            
         snapshot = tracemalloc.take_snapshot()
         tracemalloc.stop()
         display_top(snapshot)
@@ -208,7 +223,7 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         # Mouse button down event to handle clicks on different pages and game interactions
-        if event.type == pygame.MOUSEBUTTONDOWN:
+        if not gameOver and event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:  # Left mouse button
                 # Handles main page button clicks and changes; also logs which pages has been clicked
                 if currentPage == 'main' and main_check_button_click(event.pos):
@@ -243,11 +258,17 @@ while running:
                                     updateDisplay = True
                                     lastMoveTime = pygame.time.get_ticks()  # Update last move time
     # If we're in game and it is not the Human playing, but BIP or the Robot, make_robot_move()
-    if currentPage == 'game':
+    if not gameOver and currentPage == 'game':
         if adversary == 'Human' and currentPlayer == 'BIP' and currentTime - lastMoveTime > moveDelay:
             make_robot_move()
         elif adversary == 'Robot' and currentTime - lastMoveTime > moveDelay:
-            make_robot_move()
+            if not firstMoveDone:
+                click_randomCell()
+                currentSymbol = 'O' if currentSymbol == 'X' else 'X'
+                currentPlayer = 'BIP'
+                firstMoveDone = True
+            else:
+                make_robot_move()
 
     # Checks if there's a winner and prints the results on the console
     winner = check_winner()
@@ -260,6 +281,9 @@ while running:
                 winner_name = 'Human' if adversary == 'Human' else 'Robot'
             print(f"Player {winner_name} wins!")
         running = False
+        # Set gameOver to True to indicate the game has ended
+        gameOver = True
+        
 
     # Page drawing, based on current page
     if currentPage == 'main':
@@ -279,5 +303,12 @@ while running:
         pygame.display.flip()
 
     clock.tick(60)  # Limit the frame rate to 60 FPS
+
+
+# Keep the window open after the game ends
+while gameOver:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            gameOver = False
 
 pygame.quit()

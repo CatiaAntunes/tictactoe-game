@@ -93,6 +93,7 @@ def confirm_check_button_click(pos):
 
 firstMoveDone = False
 def click_randomCell():
+    global updateDisplay
     available_cells = [cell for row in cells for cell in row if not cell.clicked]
     if available_cells:
         randomCell = random.choice(available_cells)

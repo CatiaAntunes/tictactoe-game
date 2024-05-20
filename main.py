@@ -148,7 +148,7 @@ def make_robot_move():
         for cell in row:
             # If a cell is not clicked, simulate a click
             if not cell.clicked:
-
+                #print(f"Evaluating cell at position ({cell.row + 1}, {cell.col + 1}) with symbol {symbol}") #debug
                 cell.click(symbol)
                 # Uses the algorithm based on the current player and selected algorithm
                 if ((algorithm == 'MinMax' and currentPlayer == 'BIP') or (algorithm == 'AlphaBeta' and currentPlayer == 'Adversary')):
@@ -162,6 +162,7 @@ def make_robot_move():
                 if score > bestScore:
                     bestScore = score
                     bestMove = cell
+                #print(f"Cell at position ({cell.row + 1}, {cell.col + 1}) evaluated with score: {score}") #debug
     # Make the best move, if found
     if bestMove:
         bestMove.click(symbol)

@@ -11,11 +11,14 @@ class Cell:
         self.rect = object defining the cell's position and size
         self.clicked = boolean indicating whether the cell has been clicked
         self.symbol = stores the symbol ('X' or 'O') that occupies the cell
+        row and col added for debugging purposes
     """
-    def __init__(self, x, y, width, height):
+    def __init__(self, x, y, width, height, row, col):
         self.rect = pygame.Rect(x, y, width, height)
         self.clicked = False
         self.symbol = None
+        self.row = row
+        self.col = col
 
     """ Click Method 
         Updates the cell's state to the given symbol if it has not been clicked yet
@@ -27,6 +30,7 @@ class Cell:
             self.symbol = symbol
             # Changes the clicked to True
             self.clicked = True
+            #print(f"Cell clicked at position ({self.row + 1}, {self.col + 1}) with symbol {symbol}") #debug
             return True
         # Otherwise returns False (so it cannot be clicked)
         return False
@@ -60,7 +64,7 @@ for row in range(3):
     for col in range(3):
         x = startX + col * (cellSize + margin)
         y = startY + row * (cellSize + margin)
-        cellRow.append(Cell(x, y, cellSize, cellSize))
+        cellRow.append(Cell(x, y, cellSize, cellSize, row, col))
     cells.append(cellRow)
 
 """ Draw Game Board

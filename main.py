@@ -183,7 +183,7 @@ def make_robot_move():
             print(f"Move {numMoves} by {player}: Time Spent: {elapsed_time_s:.4f} seconds ({elapsed_time_us:.0f} microseconds)")
         else:
             print(f"Move {numMoves}: Time Spent: < 0.0001 seconds (< 100 microseconds)")
-            
+
         snapshot = tracemalloc.take_snapshot()
         tracemalloc.stop()
         display_top(snapshot)
@@ -264,9 +264,10 @@ while running:
         elif adversary == 'Robot' and currentTime - lastMoveTime > moveDelay:
             if not firstMoveDone:
                 click_randomCell()
+                firstMoveDone = True
+                lastMoveTime = pygame.time.get_ticks()  # Update last move time after the first random move
                 currentSymbol = 'O' if currentSymbol == 'X' else 'X'
                 currentPlayer = 'BIP'
-                firstMoveDone = True
             else:
                 make_robot_move()
 

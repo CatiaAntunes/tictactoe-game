@@ -1,7 +1,10 @@
 from functions.game import *
 
+""" Get Possible Moves Function
+This function iterates through all the cells in the tic-tac-toe board and returns a list of cells that have not been clicked. 
+These are the possible moves that can be made in the current state of the game.
+"""
 def get_possible_moves(cells):
-    # Function to return all possible moves (unclicked cells) on the board.
     moves = []
     for row in cells:
         for cell in row:
@@ -9,44 +12,77 @@ def get_possible_moves(cells):
                 moves.append(cell)
     return moves
 
-def alphabeta(cells, depth, alpha, beta, ai_turn):
-    # Check if there is a winner or if the maximum depth is reached
-    winner = check_winner()  # Came from functions.game
+""" Alpha-Beta Algorithm
+This function implements the Alpha-Beta Algorithm
+1. The algorithm first checks if there's a winner or if the maximum search depth has been reached
+2. Depending on whose turn it is ('ai turn'), the function recursively evaluates all possible moves
+"""
+def alphabeta(cells, depth, alpha, beta, aiTurn):
+    # Checks if there's a winner
+    winner = check_winner()
+    # If that turns out to be true or depth has reached 0 (no more possible moves)
     if winner or depth == 0:
-        return evaluate(winner, depth)  # Return the evaluation of the winner
-
-    if ai_turn:
-        # AI turn (maximizing player)
-        max_eval = float('-inf')  # Initialize max evaluation with negative infinity
-        for cell in get_possible_moves(cells):
-            cell.click('O')  # Assume that AI is 'O'
-            eval = alphabeta(cells, depth - 1, alpha, beta, False)  # Use recursion to call the next turn
-            cell.clicked = False  # Reset state of the cell
-            cell.symbol = None  # Reset the symbol of the cell
-            max_eval = max(max_eval, eval)  # Update the maximum evaluation
-            alpha = max(alpha, eval)  # Update the value of alpha
-            if beta <= alpha:
-                break  # Alpha-beta pruning: stop the search if the condition is met
-        return max_eval  # Return the maximum evaluation
-    else:
-        # Opponent's turn (minimizing player)
-        min_eval = float('inf')  # Initialize min evaluation with positive infinity
-        for cell in get_possible_moves(cells):
-            cell.click('X')  # Assume that 'X' is the opponent's symbol
-            eval = alphabeta(cells, depth - 1, alpha, beta, True)  # Call recursively for the next turn
-            cell.clicked = False  # Reset state of the cell
-            cell.symbol = None  # Reset the symbol of the cell
-            min_eval = min(min_eval, eval)  # Update the minimum evaluation
-            beta = min(beta, eval)  # Update the value of beta
-            if beta <= alpha:
-                break  # Alpha-beta pruning: stop the search if the condition is met
-        return min_eval  # Return the minimum evaluation
+        # Returns the evaluation of the board state using the evaluate function
+        return evaluate(winner, depth)
     
-def evaluate(winner, depth):
-    if winner == 'O':  # Assume that 'O' is the AI
-        return 10 - depth  # Return a higher value if AI wins quickly
-    elif winner == 'X':  # Assume that 'X' is the opponent
-        return depth - 10  # Return a lower value if the opponent wins quickly
+    """ AI's Turn """
+    # Maximizing AI's Turn
+    if aiTurn:
+        # Initialize 'maxEval' to negative infinity
+        maxEval = float('-inf')
+        # For each possible move
+        for cell in get_possible_moves(cells):
+            # Simulate the move by clicking the cell with 'O'
+            cell.click('O') 
+            # Recursively call 'alphabeta' with decreased depth, updated alpha and beta values and aiTurn
+            eval = alphabeta(cells, depth - 1, alpha, beta, False)
+            # Undo the move by resetting the cell's clicked and symbol
+            cell.clicked = False
+            cell.symbol = None
+            # Update 'maxEval' with the maximum value between maxEval and evaluation of the move
+            maxEval = max(maxEval, eval)
+            # Update alpha with the maximum value between 'alpha' and 'eval'
+            alpha = max(alpha, eval)
+            # If beta is less than or equal to alpha, break out of the loop (prunning)
+            if beta <= alpha:
+                break
+        # Return 'maxEval'
+        return maxEval
+    
+    # Minimizing Player's Turn
     else:
-        return 0  # Return 0 if it is a draw
+        # Initialize 'minEval' to positive infinity
+        minEval = float('inf')
+        # For each possible move
+        for cell in get_possible_moves(cells):
+            # Simulate the move by clicking the cell with 'X'
+            cell.click('X')
+            # Recursively call 'alphabeta' with decreased depth, updated alpha and beta values, and sets 'aiTurn' to True
+            eval = alphabeta(cells, depth - 1, alpha, beta, True)
+            # Undo the move by resetting the cell's clicked and symbol
+            cell.clicked = False
+            cell.symbol = None
+            # Update 'minEval' with the minimum value between 'minEval' and the evaluation of the move
+            minEval = min(minEval, eval)
+            # Update beta with the minimum value between value and eval
+            beta = min(beta, eval)
+            # If beta is less than or equal to 'alpha', break out of the loop (prunning)
+            if beta <= alpha:
+                break
+        # Return 'minEval'
+        return minEval
+
+""" Evaluate Function
+The evaluate function returns a score based on the winner and the depth
+10 - depth if 'O' wins = the faster the win, the higher the score
+depth - 10 if 'X' wins = the faster the loss, the lower the score
+'0' if there's no winner (draw or ongoing game)
+"""    
+def evaluate(winner, depth):
+    if winner == 'O':
+        return 10 - depth
+    elif winner == 'X':
+        return depth - 10
+    else:
+        return 0
 

@@ -2,63 +2,88 @@ import pygame
 screen = pygame.display.set_mode((1280, 720))
 from theme.elements import *
 
-def draw_main_page(mouse_pos, main_buttons, main_button_images):
+""" Draw the Main Page """
+def draw_main_page(mousePos, mainButtons, mainButtonImages):
+    #Fills the screen with the color salmon
     screen.fill(salmon)
-    screen.blit(titleLb, titleLb_rect)
-    screen.blit(titleDescLb, titleDescLb_rect)
-    screen.blit(userOptionLb, userOptionLb_rect)
-    screen.blit(userOptionDescLb, userOptionDescLb_rect)
-    for index, button in enumerate(main_buttons):
-        normal_image, hover_image = main_button_images[index]
-        if button.collidepoint(mouse_pos):
-            screen.blit(hover_image, button.topleft)
+    # Draws specified labels at their respective positions
+    screen.blit(titleLb, titleLbRect)
+    screen.blit(titleDescLb, titleDescLbRect)
+    screen.blit(userOptionLb, userOptionLbRect)
+    screen.blit(userOptionDescLb, userOptionDescLbRect)
+
+    # Iterates over 'mainButtons' to draw the buttons. If the mouse cursor is over a button, it draws the hover image, otherwise, it draws the normal image
+    for index, button in enumerate(mainButtons):
+        normalImage, hoverImage = mainButtonImages[index]
+        if button.collidepoint(mousePos):
+            screen.blit(hoverImage, button.topleft)
         else:
-            screen.blit(normal_image, button.topleft)
+            screen.blit(normalImage, button.topleft)
+
+    # Updates the display with the drawn content
     pygame.display.flip()
 
-def draw_algorithm_page(mouse_pos, algorithm_buttons, algorithm_button_images):
+""" Draw the Algorithm Selection Page """
+def draw_algorithm_page(mousePos, algorithmButtons, algorithmButtonsImages):
+    #Fills the screen with the color salmon
     screen.fill(salmon)
-    screen.blit(titleLb, titleLb_rect)
-    screen.blit(titleDescLb, titleDescLb_rect)
-    screen.blit(algoOptionLb, algoOptionLb_rect)
-    screen.blit(algoOptionDescLb, algoOptionDescLb_rect)
-    for index, button in enumerate(algorithm_buttons):
-        normal_image, hover_image = algorithm_button_images[index]
-        if button.collidepoint(mouse_pos):
-            screen.blit(hover_image, button.topleft)
+    # Draws specified labels at their respective positions
+    screen.blit(titleLb, titleLbRect)
+    screen.blit(titleDescLb, titleDescLbRect)
+    screen.blit(algoOptionLb, algoOptionLbRect)
+    screen.blit(algoOptionDescLb, algoOptionDescLbRect)
+    # Iterates over 'algorithmButtons' to draw the buttons. If the mouse cursor is over a button, it draws the hover image, otherwise, it draws the normal image
+    for index, button in enumerate(algorithmButtons):
+        normalImage, hoverImage = algorithmButtonsImages[index]
+        if button.collidepoint(mousePos):
+            screen.blit(hoverImage, button.topleft)
         else:
-            screen.blit(normal_image, button.topleft)
-    pygame.display.flip()
-
-def draw_confirm_page(mouse_pos, confirm_button, confirm_button_images, adversary, algorithm, robotv2_images):
-    confirmOptionLb = get_confirmOptionLb(adversary, algorithm)
-    confirmOptionLb_rect = get_confirmOptionLb_rect(confirmOptionLb)
-    screen.fill(salmon)
-    screen.blit(titleLb, titleLb_rect)
-    screen.blit(titleDescLb, titleDescLb_rect)
-    screen.blit(confirmOptionLb, confirmOptionLb_rect)
-    screen.blit(bipLb, bipLb_rect)
-    robot_normal_img, robot_hover_img = robotv2_images[0]
-    screen.blit(robot_normal_img, (500, 350))
-    for index, button in enumerate(confirm_button):
-        normal_image, hover_image = confirm_button_images[index]
-        if button.collidepoint(mouse_pos):
-            screen.blit(hover_image, button.topleft)
-            if index == 0:
-                screen.blit(robot_hover_img, (500, 350))
-            else:
-                screen.blit(robot_normal_img, (500, 350))
-        else:
-            screen.blit(normal_image, button.topleft)
-    pygame.display.flip()
-
-def draw_game_page(mouse_pos, game_board):
-    screen.fill(salmon)
-    titleLb_rect = titleLb.get_rect(center=(150, 50))
-    titleDescLb_rect = titleDescLb.get_rect(center=(220,70))
-    screen.blit(titleLb, titleLb_rect)
-    screen.blit(titleDescLb, titleDescLb_rect)
-    screen.blit(game_board, (325,50))
+            screen.blit(normalImage, button.topleft)
     
+    # Updates the display with the drawn content
+    pygame.display.flip()
 
+""" Draw the Confirm Page """
+def draw_confirm_page(mousePos, confirmButton, confirmButtonImages, adversary, algorithm, robotv2Images):
+    # Gets choices made from the main page to display in a label, dynamically; Also gets the position (rect) information
+    confirmOptionLb = get_confirmOptionLb(adversary, algorithm)
+    confirmOptionLbRect = get_confirmOptionLb_rect(confirmOptionLb)
+    #Fills the screen with the color salmon
+    screen.fill(salmon)
+    # Draws specified labels at their respective positions
+    screen.blit(titleLb, titleLbRect)
+    screen.blit(titleDescLb, titleDescLbRect)
+    screen.blit(confirmOptionLb, confirmOptionLbRect)
+    screen.blit(bipLb, bipLbRect)
+    # Gets images for the robot image (not buttons)
+    robotNormalImg, robotHoverImg = robotv2Images[0]
+    screen.blit(robotNormalImg, (500, 350))
+    # Iterates over 'confirmButtons' to draw the buttons. If the mouse cursor is over the YES button, it draws the hover image, otherwise, it draws the normal image
+    for index, button in enumerate(confirmButton):
+        normalImage, hoverImage = confirmButtonImages[index]
+        if button.collidepoint(mousePos):
+            screen.blit(hoverImage, button.topleft)
+            if index == 0:
+                screen.blit(robotHoverImg, (500, 350))
+            else:
+                screen.blit(robotNormalImg, (500, 350))
+        else:
+            screen.blit(normalImage, button.topleft)
+    
+    # Updates the display with the drawn content
+    pygame.display.flip()
+
+""" Draw the Game Page """
+def draw_game_page(mousePos, gameBoard):
+    #Fills the screen with the color salmon
+    screen.fill(salmon)
+    # Draws specified labels at their respective positions
+    titleLbRect = titleLb.get_rect(center=(150, 50))
+    titleDescLbRect = titleDescLb.get_rect(center=(220,70))
+    screen.blit(titleLb, titleLbRect)
+    screen.blit(titleDescLb, titleDescLbRect)
+    # Draws the gameBoard
+    screen.blit(gameBoard, (325,50))
+
+    # Updates the display with the drawn content
     pygame.display.flip()
